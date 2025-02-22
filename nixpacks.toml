@@ -16,17 +16,14 @@ nixpkgsArchive = 'dbc4f15b899ac77a8d408d8e0f89fa9c0c5f2b78'
 dependsOn = ['setup']
 cmds = [
     'sudo apt-get update',
-    'sudo apt-get install -y default-libmysqlclient-dev libapache2-mod-php php8.1 php8.1-mysql php8.1-gd php8.1-redis apache2 redis-tools wget',
+    'sudo apt-get install -y default-libmysqlclient-dev libapache2-mod-php php8.1 php8.1-mysql php8.1-gd php8.1-redis apache2 redis-server redis-tools wget',
     # Crea y ajusta permisos para directorios de datos
     'mkdir -p /var/lib/mysql /var/lib/redis',
     'chmod -R 755 /var/lib/mysql',
     'chmod -R 755 /var/lib/redis',
-    # Descarga e instala MySQL y Redis manualmente (binarios mínimos)
+    # Descarga e instala MySQL manualmente (binarios mínimos)
     'wget https://dev.mysql.com/get/downloads/mysql-8.0/mysql-server_8.0.41-1ubuntu22.04_amd64.deb -O /tmp/mysql-server.deb',
-    'wget https://packages.redis.io/redis/redis-7.2.4-1.el9.x86_64.rpm -O /tmp/redis-server.rpm',
     'dpkg -i /tmp/mysql-server.deb || apt-get install -f -y',
-    'rpm2cpio /tmp/redis-server.rpm | cpio -idmv',
-    'mv /usr/bin/redis* /usr/local/bin/',
     # Inicia MySQL en segundo plano y espera 5 segundos para que esté listo
     'mysqld --user=mysql --datadir=/var/lib/mysql & sleep 5',
     # Inicia Redis en segundo plano, ajusta configuración y permisos
