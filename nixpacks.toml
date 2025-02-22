@@ -7,8 +7,8 @@ nixPkgs = [
     'git',
     'curl',
     'libpng',
-    'mysql-server',  # MySQL server
-    'redis-server'   # Redis server
+    'mysql',  # Cambia mysql-server por mysql
+    'redis'   # Cambia redis-server por redis
 ]
 nixLibs = ['libmysqlclient']
 nixOverlays = ['https://github.com/railwayapp/nix-npm-overlay/archive/main.tar.gz']
@@ -19,17 +19,13 @@ dependsOn = ['setup']
 cmds = [
     'sudo apt-get update',
     'sudo apt-get install -y libapache2-mod-php php8.1-mysql php8.1-gd php8.1-redis apache2 redis-tools wget',
-    # Inicia MySQL en segundo plano y espera 5 segundos para que esté listo
-    'mysqld & sleep 5',
-    # Inicia Redis en segundo plano, ajusta permisos y configuración
-    'redis-server --port 6379 --protected-mode no &',
+    'mysqld & sleep 5',  # Inicia MySQL en segundo plano y espera 5 segundos
+    'redis-server --port 6379 --protected-mode no &',  # Inicia Redis en segundo plano
     # Asegura permisos para el archivo de configuración de Redis
     'chmod 644 /etc/redis/redis.conf',
     # Configura y crea la base de datos MySQL
     '''mysql -u root -e "CREATE DATABASE krayin_db;" && mysql -u root -e "CREATE USER 'krayineu_user'@'localhost' IDENTIFIED BY 'R3g3n3ri&';" && mysql -u root -e "GRANT ALL PRIVILEGES ON krayin_db.* TO 'krayineu_user'@'localhost';" && mysql -u root -e "FLUSH PRIVILEGES;"''',
-    # Ajusta la configuración de Redis para escuchar en 0.0.0.0 y desactiva el modo protegido
-    '''sed -i "s/bind 127.0.0.1 ::1/bind 0.0.0.0/" /etc/redis/redis.conf && sed -i "s/protected-mode yes/protected-mode no/" /etc/redis/redis.conf''',
-    # Instala dependencias de Composer
+    '''sed -i "s/bind 127.0.0.1 ::1/bind 0.0.0.0/" /etc/redis/redis.conf''',
     'composer install --no-dev --optimize-autoloader'
 ]
 
