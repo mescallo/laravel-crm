@@ -1,22 +1,16 @@
-# Configuración de Nixpacks para Krayin CRM
-
 [phases.setup]
-  aptPkgs = ['git', 'curl', 'libpng-dev', 'libonig-dev', 'libxml2-dev', 'libzip-dev', 'zip', 'unzip', 'libicu-dev', 'zlib1g-dev', 'libfreetype6-dev', 'libjpeg-dev', 'libgmp-dev', 'netcat-openbsd']
+nixPkgs = ['php81', 'php81Packages.composer', 'nodejs', 'apache2', 'git', 'curl', 'libpng-dev']
+aptPkgs = ['libapache2-mod-php', 'php-mysql', 'php-gd', 'php-redis', 'redis-tools']
 
 [phases.install]
-  cmds = [
-    'docker-php-ext-configure gd --with-freetype --with-jpeg',
-    'docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip calendar intl soap xml',
-    'pecl install redis && docker-php-ext-enable redis',
-    'a2enmod rewrite',
-    'curl -sL https://deb.nodesource.com/setup_14.x | bash - && apt-get install -y nodejs',
-    'composer install --optimize-autoloader --no-dev',
-    'npm install',
-    'npm run production',
-    'php artisan key:generate',
-    'php artisan krayin-crm:install',
-    'php artisan config:cache'
-  ]
+cmds = ['composer install --no-dev --optimize-autoloader']
 
-[phases.start]
-  cmd = "php artisan serve --host=0.0.0.0 --port=8090"
+[phases.build]
+cmds = [
+  'npm install',
+  'npm run production',
+  'php artisan krayin-crm:install'
+]
+
+[start]
+cmd = 'php artisan serve --host=0.0.0.0 --port=8090'
