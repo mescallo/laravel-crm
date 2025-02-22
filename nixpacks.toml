@@ -1,19 +1,38 @@
 [phases.setup]
-nixPkgs = ['php82', 'php82Packages.composer', 'nodejs', 'apacheHttpd', 'git', 'curl', 'libpng']
+nixPkgs = [
+    'php82',
+    'php82Packages.composer',
+    'nodejs',
+    'apacheHttpd',
+    'git',
+    'curl',
+    'libpng',
+    'mysql-server',  # Añade MySQL
+    'redis-server'   # Añade Redis
+]
+nixLibs = ['libmysqlclient']
+nixOverlays = ['https://github.com/railwayapp/nix-npm-overlay/archive/main.tar.gz']
+nixpkgsArchive = 'dbc4f15b899ac77a8d408d8e0f89fa9c0c5f2b78'
 
 [phases.install]
+dependsOn = ['setup']
 cmds = [
-  'sudo apt-get update',
-  'sudo apt-get install -y libapache2-mod-php php-mysql php-gd php-redis redis-tools wget',
-  'composer install --no-dev --optimize-autoloader'
+    'sudo apt-get update',
+    'sudo apt-get install -y libapache2-mod-php php-mysql php-gd php-redis redis-tools wget',
+    # Configura y crea la base de datos MySQL
+    'service mysql start && mysql -e "CREATE DATABASE krayin_db;" && mysql -e "CREATE USER \'krayineu_user\'@\'localhost\' IDENTIFIED BY \'R3g3n3ri&\';" && mysql -e "GRANT ALL PRIVILEGES ON krayin_db.* TO \'krayineu_user\'@\'localhost\';" && mysql -e "FLUSH PRIVILEGES;"',
+    # Configura Redis para escuchar en 0.0.0.0 y desactiva el modo protegido
+    'sed -i "s/bind 127.0.0.1 ::1/bind 0.0.0.0/" /etc/redis/redis.conf && sed -i "s/protected-mode yes/protected-mode no/" /etc/redis/redis.conf',
+    'composer install --no-dev --optimize-autoloader'
 ]
 
 [phases.build]
+dependsOn = ['install']
 cmds = [
-  'npm install',
-  'npm run build',  # Cambiado de 'npm run production' a 'npm run build'
-  'php artisan krayin-crm:install'
+    'npm install',
+    'npm run build',  # Asegúrate de que este comando sea válido en package.json
+    'php artisan krayin-crm:install'
 ]
 
 [start]
-cmd = 'php artisan serve --host=0.0.0.0 --port=8090'
+cmd = 'service mysql start && service redis-server start && php artisan serve --host=0.0.0.0 --port=8090'
