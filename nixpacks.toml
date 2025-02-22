@@ -16,6 +16,12 @@ dependsOn = ['setup']
 cmds = [
     'sudo apt-get update',
     'sudo apt-get install -y default-libmysqlclient-dev php8.1-fpm php8.1-mysql php8.1-gd php8.1-redis php8.1-curl php8.1-xml php8.1-zip php8.1-mbstring php8.1-bcmath php8.1-intl',
+    # Corregir el archivo .env
+    'sed -i \'s/APP_NAME=Krayin CRM/APP_NAME="Krayin CRM"/g\' .env',
+    # Ajustar la conexión a base de datos para servicios externos
+    'sed -i "s/DB_HOST=127.0.0.1/DB_HOST=${DB_HOST:-database}/g" .env',
+    'sed -i "s/REDIS_HOST=127.0.0.1/REDIS_HOST=${REDIS_HOST:-redis}/g" .env',
+    # Instalar dependencias
     'composer install --no-dev --optimize-autoloader'
 ]
 
@@ -24,9 +30,6 @@ dependsOn = ['install']
 cmds = [
     'npm install',
     'npm run build',
-    # Ajustar el archivo .env para usar variables de entorno
-    'sed -i "s/DB_HOST=127.0.0.1/DB_HOST=${DB_HOST:-database}/g" .env',
-    'sed -i "s/REDIS_HOST=127.0.0.1/REDIS_HOST=${REDIS_HOST:-redis}/g" .env',
     'php artisan key:generate --force',
     'php artisan config:cache',
     'php artisan route:cache',
