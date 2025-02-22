@@ -5,9 +5,7 @@ nixPkgs = [
     'nodejs',
     'git',
     'curl',
-    'libpng',
-    'mariadb',
-    'redis'
+    'libpng'
 ]
 nixLibs = ['libmysqlclient']
 nixOverlays = ['https://github.com/railwayapp/nix-npm-overlay/archive/main.tar.gz']
@@ -17,7 +15,7 @@ nixpkgsArchive = 'dbc4f15b899ac77a8d408d8e0f89fa9c0c5f2b78'
 dependsOn = ['setup']
 cmds = [
     'sudo apt-get update',
-    'sudo apt-get install -y default-libmysqlclient-dev php8.1-fpm php8.1-mysql php8.1-gd php8.1-redis php8.1-curl php8.1-xml php8.1-zip php8.1-mbstring',
+    'sudo apt-get install -y default-libmysqlclient-dev mariadb-server redis-server php8.1-fpm php8.1-mysql php8.1-gd php8.1-redis php8.1-curl php8.1-xml php8.1-zip php8.1-mbstring php8.1-bcmath php8.1-intl',
     'mkdir -p /var/lib/mysql /run/mysqld',
     'chown -R mysql:mysql /var/lib/mysql /run/mysqld',
     'mysql_install_db --user=mysql --datadir=/var/lib/mysql',
@@ -41,7 +39,8 @@ cmds = [
     'php artisan key:generate --force',
     'php artisan migrate --force',
     'php artisan config:cache',
-    'php artisan route:cache'
+    'php artisan route:cache',
+    'php artisan view:cache'
 ]
 
 [start]
