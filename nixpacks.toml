@@ -27,8 +27,8 @@ cmds = [
     'redis-server --daemonize yes',
     'sleep 5',
     'mysql -u root -e "CREATE DATABASE IF NOT EXISTS krayin_db;"',
-    'mysql -u root -e "CREATE USER IF NOT EXISTS \'krayineu_user\'@\'localhost\' IDENTIFIED BY \'R3g3n3ri&\';"',
-    'mysql -u root -e "GRANT ALL PRIVILEGES ON krayin_db.* TO \'krayineu_user\'@\'localhost\';"',
+    'mysql -u root -e "CREATE USER IF NOT EXISTS krayineu_user@localhost IDENTIFIED BY \"R3g3n3ri&\";"',
+    'mysql -u root -e "GRANT ALL PRIVILEGES ON krayin_db.* TO krayineu_user@localhost;"',
     'mysql -u root -e "FLUSH PRIVILEGES;"',
     'composer install --no-dev --optimize-autoloader'
 ]
