@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ['php81', 'php81Packages.composer', 'nodejs', 'apache2', 'git', 'curl', 'libpng-dev']
+nixPkgs = ['php81', 'php81Packages.composer', 'nodejs', 'apacheHttpd', 'git', 'curl', 'libpng-dev']
 aptPkgs = ['libapache2-mod-php', 'php-mysql', 'php-gd', 'php-redis', 'redis-tools']
 
 [phases.install]
