@@ -19,10 +19,10 @@ dependsOn = ['setup']
 cmds = [
     'sudo apt-get update',
     'sudo apt-get install -y libapache2-mod-php php-mysql php-gd php-redis redis-tools wget',
-    # Configura y crea la base de datos MySQL
-    'service mysql start && mysql -e "CREATE DATABASE krayin_db;" && mysql -e "CREATE USER \'krayineu_user\'@\'localhost\' IDENTIFIED BY \'R3g3n3ri&\';" && mysql -e "GRANT ALL PRIVILEGES ON krayin_db.* TO \'krayineu_user\'@\'localhost\';" && mysql -e "FLUSH PRIVILEGES;"',
-    # Configura Redis para escuchar en 0.0.0.0 y desactiva el modo protegido
-    'sed -i "s/bind 127.0.0.1 ::1/bind 0.0.0.0/" /etc/redis/redis.conf && sed -i "s/protected-mode yes/protected-mode no/" /etc/redis/redis.conf',
+    'mysqld & sleep 5',  # Inicia MySQL en segundo plano y espera 5 segundos
+    'redis-server --port 6379 --protected-mode no &',  # Inicia Redis en segundo plano
+    '''mysql -u root -e "CREATE DATABASE krayin_db;" && mysql -u root -e "CREATE USER 'krayineu_user'@'localhost' IDENTIFIED BY 'R3g3n3ri&';" && mysql -u root -e "GRANT ALL PRIVILEGES ON krayin_db.* TO 'krayineu_user'@'localhost';" && mysql -u root -e "FLUSH PRIVILEGES;"''',
+    '''sed -i "s/bind 127.0.0.1 ::1/bind 0.0.0.0/" /etc/redis/redis.conf''',
     'composer install --no-dev --optimize-autoloader'
 ]
 
