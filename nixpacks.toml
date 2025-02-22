@@ -16,19 +16,15 @@ nixpkgsArchive = 'dbc4f15b899ac77a8d408d8e0f89fa9c0c5f2b78'
 dependsOn = ['setup']
 cmds = [
     'sudo apt-get update',
-    'sudo apt-get install -y default-libmysqlclient-dev libapache2-mod-php php8.1 php8.1-mysql php8.1-gd php8.1-redis apache2 redis-server redis-tools wget',
+    'sudo apt-get install -y mysql-server mysql-client default-libmysqlclient-dev libapache2-mod-php php8.1 php8.1-mysql php8.1-gd php8.1-redis apache2 redis-server redis-tools wget',
     # Crea y ajusta permisos para directorios de datos
     'mkdir -p /var/lib/mysql /var/lib/redis',
     'chmod -R 755 /var/lib/mysql',
     'chmod -R 755 /var/lib/redis',
-    # Descarga e instala MySQL manualmente (binarios mínimos)
-    'wget https://dev.mysql.com/get/downloads/mysql-8.0/mysql-server_8.0.41-1ubuntu22.04_amd64.deb -O /tmp/mysql-server.deb',
-    'wget https://dev.mysql.com/get/downloads/mysql-8.0/mysql-client_8.0.41-1ubuntu22.04_amd64.deb -O /tmp/mysql-client.deb',
-    'dpkg -i /tmp/mysql-server.deb /tmp/mysql-client.deb || apt-get install -f -y',
-    # Inicia MySQL en segundo plano y espera 5 segundos para que esté listo
-    'mysqld --user=mysql --datadir=/var/lib/mysql & sleep 5',
+    # Inicia MySQL en segundo plano y espera 10 segundos para que esté listo
+    'mysqld --user=mysql --datadir=/var/lib/mysql & sleep 10',
     # Inicia Redis en segundo plano, ajusta configuración y permisos
-    'redis-server --port 6379 --protected-mode no --dir /var/lib/redis & sleep 5',
+    'redis-server --port 6379 --protected-mode no --dir /var/lib/redis & sleep 10',
     # Configura y crea la base de datos MySQL
     '''mysql -u root -e "CREATE DATABASE IF NOT EXISTS krayin_db;" && mysql -u root -e "CREATE USER IF NOT EXISTS 'krayineu_user'@'localhost' IDENTIFIED BY 'R3g3n3ri&';" && mysql -u root -e "GRANT ALL PRIVILEGES ON krayin_db.* TO 'krayineu_user'@'localhost';" && mysql -u root -e "FLUSH PRIVILEGES;"''',
     # Ajusta la configuración de Redis para escuchar en 0.0.0.0
@@ -49,4 +45,4 @@ cmds = [
 ]
 
 [start]
-cmd = 'mysqld --user=mysql --datadir=/var/lib/mysql & sleep 5 && redis-server --port 6379 --protected-mode no --dir /var/lib/redis & sleep 5 && php artisan serve --host=0.0.0.0 --port=8090'
+cmd = 'mysqld --user=mysql --datadir=/var/lib/mysql & sleep 10 && redis-server --port 6379 --protected-mode no --dir /var/lib/redis & sleep 10 && php artisan serve --host=0.0.0.0 --port=8090'
