@@ -3,10 +3,11 @@ nixPkgs = [
     'php82',
     'php82Packages.composer',
     'nodejs',
-    'apacheHttpd',
     'git',
     'curl',
-    'libpng'
+    'libpng',
+    'mariadb',
+    'redis'
 ]
 nixLibs = ['libmysqlclient']
 nixOverlays = ['https://github.com/railwayapp/nix-npm-overlay/archive/main.tar.gz']
@@ -16,33 +17,36 @@ nixpkgsArchive = 'dbc4f15b899ac77a8d408d8e0f89fa9c0c5f2b78'
 dependsOn = ['setup']
 cmds = [
     'sudo apt-get update',
-    'sudo apt-get install -y mysql-server mysql-client default-libmysqlclient-dev libapache2-mod-php php8.1 php8.1-mysql php8.1-gd php8.1-redis apache2 redis-server redis-tools wget',
-    # Crea y ajusta permisos para directorios de datos
-    'mkdir -p /var/lib/mysql /var/lib/redis',
-    'chmod -R 755 /var/lib/mysql',
-    'chmod -R 755 /var/lib/redis',
-    # Inicia MySQL en segundo plano y espera 10 segundos para que esté listo
-    'mysqld --user=mysql --datadir=/var/lib/mysql & sleep 10',
-    # Inicia Redis en segundo plano, ajusta configuración y permisos
-    'redis-server --port 6379 --protected-mode no --dir /var/lib/redis & sleep 10',
-    # Configura y crea la base de datos MySQL
-    '''mysql -u root -e "CREATE DATABASE IF NOT EXISTS krayin_db;" && mysql -u root -e "CREATE USER IF NOT EXISTS 'krayineu_user'@'localhost' IDENTIFIED BY 'R3g3n3ri&';" && mysql -u root -e "GRANT ALL PRIVILEGES ON krayin_db.* TO 'krayineu_user'@'localhost';" && mysql -u root -e "FLUSH PRIVILEGES;"''',
-    # Ajusta la configuración de Redis para escuchar en 0.0.0.0
-    'echo "bind 0.0.0.0" >> /etc/redis/redis.conf',
-    'chmod 644 /etc/redis/redis.conf',
-    # Instala dependencias de Composer
+    'sudo apt-get install -y default-libmysqlclient-dev php8.1-fpm php8.1-mysql php8.1-gd php8.1-redis php8.1-curl php8.1-xml php8.1-zip php8.1-mbstring',
+    # Configuración de MariaDB (en lugar de MySQL)
+    'mkdir -p /var/lib/mysql /run/mysqld',
+    'chown -R mysql:mysql /var/lib/mysql /run/mysqld',
+    'mysql_install_db --user=mysql --datadir=/var/lib/mysql',
+    'mysqld_safe --datadir=/var/lib/mysql &',
+    'sleep 10',
+    # Configuración de Redis
+    'mkdir -p /var/lib/redis',
+    'redis-server --daemonize yes',
+    'sleep 5',
+    # Creación de base de datos y usuario
+    'mysql -u root -e "CREATE DATABASE IF NOT EXISTS krayin_db;"',
+    'mysql -u root -e "CREATE USER IF NOT EXISTS \'krayineu_user\'@\'localhost\' IDENTIFIED BY \'R3g3n3ri&\';"',
+    'mysql -u root -e "GRANT ALL PRIVILEGES ON krayin_db.* TO \'krayineu_user\'@\'localhost\';"',
+    'mysql -u root -e "FLUSH PRIVILEGES;"',
+    # Instalar dependencias
     'composer install --no-dev --optimize-autoloader'
 ]
 
 [phases.build]
 dependsOn = ['install']
 cmds = [
-    # Instala dependencias de npm y construye los assets
     'npm install',
-    'npm run build',  # Asegúrate de que este comando sea válido en package.json
-    # Ejecuta la instalación de Krayin CRM, asegurando conexiones a MySQL/Redis
-    'php artisan krayin-crm:install --force'  # Añade --force para evitar confirmaciones interactivas
+    'npm run build',
+    'php artisan key:generate --force',
+    'php artisan migrate --force',
+    'php artisan config:cache',
+    'php artisan route:cache'
 ]
 
 [start]
-cmd = 'mysqld --user=mysql --datadir=/var/lib/mysql & sleep 10 && redis-server --port 6379 --protected-mode no --dir /var/lib/redis & sleep 10 && php artisan serve --host=0.0.0.0 --port=8090'
+cmd = 'mysqld_safe --datadir=/var/lib/mysql & redis-server --daemonize yes & sleep 5 && php artisan serve --host=0.0.0.0 --port=${PORT:-8090}'
