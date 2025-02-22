@@ -1,9 +1,12 @@
 [phases.setup]
-nixPkgs = ['php81', 'php81Packages.composer', 'nodejs', 'apacheHttpd', 'git', 'curl', 'libpng-dev']
-aptPkgs = ['libapache2-mod-php', 'php-mysql', 'php-gd', 'php-redis', 'redis-tools']
+nixPkgs = ['php81', 'php81Packages.composer', 'nodejs', 'apacheHttpd', 'git', 'curl', 'libpng']
 
 [phases.install]
-cmds = ['composer install --no-dev --optimize-autoloader']
+cmds = [
+  'sudo apt-get update',
+  'sudo apt-get install -y libapache2-mod-php php-mysql php-gd php-redis redis-tools wget',
+  'composer install --no-dev --optimize-autoloader'
+]
 
 [phases.build]
 cmds = [
