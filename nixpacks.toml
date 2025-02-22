@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ['php81', 'php81Packages.composer', 'nodejs', 'apacheHttpd', 'git', 'curl', 'libpng']
+nixPkgs = ['php82', 'php82Packages.composer', 'nodejs', 'apacheHttpd', 'git', 'curl', 'libpng']
 
 [phases.install]
 cmds = [
